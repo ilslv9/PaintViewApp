@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Image Paint</string>
+    <string name="width_hint">Width</string>
+    <string name="multiply">X</string>
+    <string name="height_hint">Height</string>
+    <string name="speed_hint">Speed</string>
+    <string name="generate_btn_text">Generate</string>
 
     <array name="algorithms_names">
         <item>Queue</item>

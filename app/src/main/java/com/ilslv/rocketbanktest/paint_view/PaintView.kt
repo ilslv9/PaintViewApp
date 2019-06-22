@@ -15,10 +15,15 @@ import com.stedi.randomimagegenerator.generators.ColoredRectangleGenerator
 import com.stedi.randomimagegenerator.generators.effects.ThresholdEffect
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import java.util.*
 
 
 class PaintView : View {
+
+    companion object {
+        private const val ANIMATION_FRAME_VALUE = 1000
+    }
 
     /**
      * Coefficient for animation speed
@@ -107,7 +112,7 @@ class PaintView : View {
                 }
 
                 override fun onFailedToGenerate(imageParams: ImageParams, e: Exception) {
-
+                    /*Nothing*/
                 }
             })
             .build()
@@ -119,6 +124,7 @@ class PaintView : View {
      * Queue algorithm
      */
     private fun floodFill(x: Int, y: Int) {
+        var frameCount = 0
         val queue = LinkedList<Point>()
         queue.add(Point(y, x))
         while (!queue.isEmpty()) {
@@ -130,7 +136,11 @@ class PaintView : View {
                     queue.add(Point(p.x - 1, p.y))
                     queue.add(Point(p.x, p.y + 1))
                     queue.add(Point(p.x, p.y - 1))
-                    invalidate()
+                    frameCount++
+                    if (frameCount > ANIMATION_FRAME_VALUE * animationCoefficient) {
+                        invalidate()
+                        frameCount = 0
+                    }
                 }
             }
         }
@@ -140,29 +150,38 @@ class PaintView : View {
      * Linear algorithm
      */
     private fun linearFill(x: Int, y: Int, bmp: Bitmap) {
+        var frameCount = 0
         val pixelQueue = LinkedList<Point>()
         pixelQueue.add(Point(x, y))
         while (pixelQueue.size > 0) {
-            val n = pixelQueue.poll()
-            if (bmp.getPixel(n.x, n.y) != Color.WHITE)
+            val headPoint = pixelQueue.poll()
+            if (bmp.getPixel(headPoint.x, headPoint.y) != Color.WHITE)
                 continue
 
-            val nextPoint = Point(n.x + 1, n.y)
+            val nextPoint = Point(headPoint.x + 1, headPoint.y)
 
-            while (n.x > 0 && bmp.getPixel(n.x, n.y) == Color.WHITE) {
-                bmp.setPixel(n.x, n.y, Color.BLACK)
-                invalidate()
-                if (n.y > 0 && bmp.getPixel(n.x, n.y - 1) == Color.WHITE)
-                    pixelQueue.add(Point(n.x, n.y - 1))
-                if (n.y < bmp.height - 1 && bmp.getPixel(n.x, n.y + 1) == Color.WHITE)
-                    pixelQueue.add(Point(n.x, n.y + 1))
+            while (headPoint.x > 0 && bmp.getPixel(headPoint.x, headPoint.y) == Color.WHITE) {
+                bmp.setPixel(headPoint.x, headPoint.y, Color.BLACK)
+                frameCount++
+                if (frameCount > ANIMATION_FRAME_VALUE * animationCoefficient) {
+                    invalidate()
+                    frameCount = 0
+                }
+                if (headPoint.y > 0 && bmp.getPixel(headPoint.x, headPoint.y - 1) == Color.WHITE)
+                    pixelQueue.add(Point(headPoint.x, headPoint.y - 1))
+                if (headPoint.y < bmp.height - 1 && bmp.getPixel(headPoint.x, headPoint.y + 1) == Color.WHITE)
+                    pixelQueue.add(Point(headPoint.x, headPoint.y + 1))
 
-                n.x--
+                headPoint.x--
             }
 
             while (nextPoint.x < bmp.width - 1 && bmp.getPixel(nextPoint.x, nextPoint.y) == Color.WHITE) {
                 bmp.setPixel(nextPoint.x, nextPoint.y, Color.BLACK)
-                invalidate()
+                frameCount++
+                if (frameCount > ANIMATION_FRAME_VALUE * animationCoefficient) {
+                    invalidate()
+                    frameCount = 0
+                }
                 if (nextPoint.y > 0 && bmp.getPixel(nextPoint.x, nextPoint.y - 1) == Color.WHITE)
                     pixelQueue.add(Point(nextPoint.x, nextPoint.y - 1))
                 if (nextPoint.y < bmp.height - 1 && bmp.getPixel(nextPoint.x, nextPoint.y + 1) == Color.BLACK)
@@ -176,10 +195,11 @@ class PaintView : View {
     /**
      * Recursive algorithm
      */
-    private fun recursiveFill(x: Int, y: Int) {
+    private suspend fun recursiveFill(x: Int, y: Int) {
         val currentColor = image!!.getPixel(x, y)
         if (currentColor == Color.WHITE) {
             image!!.setPixel(x, y, Color.BLACK)
+            delay(1 * animationCoefficient.toLong())
             invalidate()
             recursiveFill(x + 1, y)
             recursiveFill(x - 1, y)

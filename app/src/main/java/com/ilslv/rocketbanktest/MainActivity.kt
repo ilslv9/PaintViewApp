@@ -29,25 +29,33 @@ class MainActivity : AppCompatActivity() {
         screen_size_hint.text = "Max image width: $freeWidth, height: $freeHeight"
 
         generate_button.setOnClickListener {
+
             val userWidth = paint_view_width.text.toString().toIntOrNull()
             val userHeight = paint_view_height.text.toString().toIntOrNull()
-            if (userWidth != null && userHeight != null) {
+
+            if ((userWidth != null && userHeight != null) && userWidth < freeWidth && userHeight < freeHeight) {
                 val params = LinearLayout.LayoutParams(userWidth, userHeight)
                 params.leftMargin = dpToPx(16f)
                 params.rightMargin = dpToPx(16f)
                 params.topMargin = dpToPx(36f)
                 paint_view.layoutParams = params
                 paint_view.setGenerateImageSize(userWidth, userHeight)
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Check the hint below speed control and change your size of image",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
         paint_view_width.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-
+                /*Nothing*/
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+                /*Nothing*/
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -66,11 +74,11 @@ class MainActivity : AppCompatActivity() {
 
         paint_view_height.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-
+                /*Nothing*/
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+                /*Nothing*/
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
