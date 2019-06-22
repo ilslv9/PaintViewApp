@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Image Paint</string>
+
+    <array name="algorithms_names">
+        <item>Queue</item>
+        <item>Linear</item>
+        <item>Recursive</item>
+    </array>
 </resources>

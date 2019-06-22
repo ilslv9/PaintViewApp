@@ -2,11 +2,12 @@ package com.ilslv.rocketbanktest
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.Toast
+import android.view.View
+import android.widget.*
+import com.ilslv.rocketbanktest.paint_view.AlgorithmType
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -17,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        paint_view.setGenerateImageSize(applicationContext.resources.displayMetrics.widthPixels, 512)
+        paint_view.setGenerateImageSize(dpToPx(512f), dpToPx(512f))
         calculateScreenSize()
         initViews()
     }
@@ -31,7 +32,11 @@ class MainActivity : AppCompatActivity() {
             val userWidth = paint_view_width.text.toString().toIntOrNull()
             val userHeight = paint_view_height.text.toString().toIntOrNull()
             if (userWidth != null && userHeight != null) {
-                paint_view.layoutParams = ConstraintLayout.LayoutParams(userWidth, userHeight)
+                val params = LinearLayout.LayoutParams(userWidth, userHeight)
+                params.leftMargin = dpToPx(16f)
+                params.rightMargin = dpToPx(16f)
+                params.topMargin = dpToPx(36f)
+                paint_view.layoutParams = params
                 paint_view.setGenerateImageSize(userWidth, userHeight)
             }
         }
@@ -81,6 +86,40 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        speed_control.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                paint_view.animationCoefficient = 1f / progress
+                Toast.makeText(applicationContext, progress.toString(), Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        })
+
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.algorithms_names,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            algorithm_picker.adapter = adapter
+            algorithm_picker.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    /*Nothing*/
+                }
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val algorithms = resources.getStringArray(R.array.algorithms_names)
+                    val item = algorithms[position]
+                    paint_view.fillType = AlgorithmType.valueOf(item.toUpperCase())
+                }
+            }
+        }
 
     }
 
