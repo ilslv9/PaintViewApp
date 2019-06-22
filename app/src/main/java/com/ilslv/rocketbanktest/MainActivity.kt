@@ -102,10 +102,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
+                /*Nothing*/
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                /*Nothing*/
             }
         })
 
